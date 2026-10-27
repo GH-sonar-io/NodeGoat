@@ -74,16 +74,29 @@ const AllocationsDAO = function(db){
                 }
                 throw `The user supplied threshold: ${parsedThreshold} was not valid.`;
                 */
-                return {
-                    $where: `this.userId == ${parsedUserId} && this.stocks > '${threshold}'`
-                };
+                const parsedThreshold = Number.parseInt(threshold, 10);
+
+                if (parsedThreshold >= 0 && parsedThreshold <= 99) {
+                    return {
+                        userId: parsedUserId,
+                        stocks: {
+                            $gt: parsedThreshold
+                        }
+                    };
+                }
+                return null;
             }
             return {
                 userId: parsedUserId
             };
         };
 
-        allocationsCol.find(searchCriteria()).toArray((err, allocations) => {
+        const criteria = searchCriteria();
+        if (criteria === null) {
+            return callback("ERROR: The user supplied threshold was not valid.", null);
+        }
+
+        allocationsCol.find(criteria).toArray((err, allocations) => {
             if (err) return callback(err, null);
             if (!allocations.length) return callback("ERROR: No allocations found for the user", null);
 
