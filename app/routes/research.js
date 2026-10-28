@@ -14,17 +14,12 @@ function ResearchHandler(db) {
         if (req.query.symbol) {
             const url = req.query.url + req.query.symbol;
             return needle.get(url, (error, newResponse, body) => {
-                if (!error && newResponse.statusCode === 200) {
-                    res.writeHead(200, {
-                        "Content-Type": "text/html"
-                    });
-                }
-                res.write("<h1>The following is the stock information you requested.</h1>\n\n");
-                res.write("\n\n");
+                let output = "The following is the stock information you requested.\n\n\n\n";
                 if (body) {
-                    res.write(body);
+                    output += body;
                 }
-                return res.end();
+                res.set("Content-Type", "text/plain");
+                return res.status(200).send(output);
             });
         }
 
